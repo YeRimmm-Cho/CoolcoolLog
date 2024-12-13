@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/background_img_intro">
+
+    <!-- Welcome 텍스트 -->
+    <TextView
+        android:id="@+id/welcome_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="120dp"
+        android:text="Welcome !"
+        android:textColor="#FFFFFF"
+        android:textSize="45sp"
+        android:textStyle="bold" />
+
+    <!-- 부제목 텍스트 -->
+    <TextView
+        android:id="@+id/subtitle_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/welcome_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="수면 관리 및 추적 어플"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <!-- 앱 이름 텍스트 -->
+    <TextView
+        android:id="@+id/app_name_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/subtitle_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="쿨쿨로그"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <!-- 시작 버튼 -->
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/button_rec_start"
+        android:text="수면 관리 시작하기"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:padding="15dp" />
+
+</RelativeLayout>
