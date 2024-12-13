@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="menu_purple">#404084</color>
+    <color name="light_purple">#9192FF</color>
+    <color name="dark_purple">#312374</color>
 </resources>

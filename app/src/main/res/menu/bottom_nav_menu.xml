@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home_selector"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/nav_sleep"
+        android:icon="@drawable/ic_sleep_selector"
+        android:title="Sleep" />
+
+    <item
+        android:id="@+id/nav_statistics"
+        android:icon="@drawable/ic_statistics_selector"
+        android:title="Statics" />
+
+</menu>

@@ -40,4 +40,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // 추가 의존성
+
+    // 하단 네비게이션 바 의존성
+    implementation("com.google.android.material:material:1.9.0")
+
 }
