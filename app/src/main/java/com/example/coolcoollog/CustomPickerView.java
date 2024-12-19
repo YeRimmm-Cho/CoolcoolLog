@@ -10,6 +10,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.Locale;
+
 public class CustomPickerView extends View {
     private Paint paintCircle, paintIndicator, paintText, paintBackground, paintFilledArc, paintBoldText;
 
@@ -24,39 +26,34 @@ public class CustomPickerView extends View {
     }
 
     private void init() {
-        // 배경 페인트
+        // Paint 초기화 코드
         paintBackground = new Paint();
         paintBackground.setColor(Color.parseColor("#fafafa"));
         paintBackground.setStyle(Paint.Style.FILL);
         paintBackground.setAntiAlias(true);
 
-        // 원 테두리 페인트
         paintCircle = new Paint();
         paintCircle.setColor(Color.parseColor("#9192FF"));
         paintCircle.setStyle(Paint.Style.STROKE);
         paintCircle.setStrokeWidth(15);
         paintCircle.setAntiAlias(true);
 
-        // 채워진 원호 페인트
         paintFilledArc = new Paint();
         paintFilledArc.setColor(Color.parseColor("#404084"));
         paintFilledArc.setStyle(Paint.Style.FILL);
         paintFilledArc.setAntiAlias(true);
 
-        // 선택자 페인트
         paintIndicator = new Paint();
         paintIndicator.setColor(Color.parseColor("#312374"));
         paintIndicator.setStyle(Paint.Style.FILL);
         paintIndicator.setAntiAlias(true);
 
-        // 일반 텍스트 페인트 (시간 표시)
         paintText = new Paint();
         paintText.setColor(Color.BLACK);
         paintText.setTextSize(40);
         paintText.setAntiAlias(true);
         paintText.setTextAlign(Paint.Align.CENTER);
 
-        // Bold 텍스트 페인트 (취침/기상 텍스트)
         paintBoldText = new Paint();
         paintBoldText.setColor(Color.BLACK);
         paintBoldText.setTextSize(50);
@@ -80,7 +77,7 @@ public class CustomPickerView extends View {
         // 배경 원 그리기
         canvas.drawCircle(centerX, centerY, radius + 100, paintBackground);
 
-        // 채워진 원호 그리기 (오른쪽 영역)
+        // 채워진 원호 그리기
         Path path = new Path();
         path.moveTo(centerX, centerY); // 중심에서 시작
         float startX = (float) (centerX + radius * Math.cos(Math.toRadians(startAngle)));
@@ -93,7 +90,7 @@ public class CustomPickerView extends View {
         // 원 테두리 그리기
         canvas.drawCircle(centerX, centerY, radius, paintCircle);
 
-        // 시간 표시 (12등분, 안쪽으로 이동)
+        // 시간 표시 (12등분)
         for (int i = 0; i < 12; i++) {
             float angle = (float) Math.toRadians((i * 30) - 90); // 12등분 각도
             float textX = (float) (centerX + (radius - 30) * Math.cos(angle)); // 반지름보다 30px 안쪽
@@ -102,21 +99,18 @@ public class CustomPickerView extends View {
             canvas.drawText(hour, textX, textY, paintText);
         }
 
-        // 취침 시간 표시 (테두리 바깥)
+        // 취침/기상 시간 표시
         startX = (float) (centerX + radius * Math.cos(Math.toRadians(startAngle)));
         startY = (float) (centerY + radius * Math.sin(Math.toRadians(startAngle)));
         canvas.drawCircle(startX, startY, 20, paintIndicator);
-        float bedtimeTextX = (float) (centerX + (radius + 35) * Math.cos(Math.toRadians(startAngle)));
-        float bedtimeTextY = (float) (centerY + (radius + 35) * Math.sin(Math.toRadians(startAngle)));
-        canvas.drawText("취침", bedtimeTextX, bedtimeTextY, paintBoldText);
+        canvas.drawText("취침", centerX + (radius + 35) * (float) Math.cos(Math.toRadians(startAngle)),
+                centerY + (radius + 35) * (float) Math.sin(Math.toRadians(startAngle)), paintBoldText);
 
-        // 기상 시간 표시 (테두리 바깥)
         float endX = (float) (centerX + radius * Math.cos(Math.toRadians(endAngle)));
         float endY = (float) (centerY + radius * Math.sin(Math.toRadians(endAngle)));
         canvas.drawCircle(endX, endY, 20, paintIndicator);
-        float wakeTimeTextX = (float) (centerX + (radius + 75) * Math.cos(Math.toRadians(endAngle)));
-        float wakeTimeTextY = (float) (centerY + (radius + 75) * Math.sin(Math.toRadians(endAngle)));
-        canvas.drawText("기상", wakeTimeTextX, wakeTimeTextY, paintBoldText);
+        canvas.drawText("기상", centerX + (radius + 75) * (float) Math.cos(Math.toRadians(endAngle)),
+                centerY + (radius + 75) * (float) Math.sin(Math.toRadians(endAngle)), paintBoldText);
     }
 
     @Override
@@ -124,36 +118,65 @@ public class CustomPickerView extends View {
         float x = event.getX();
         float y = event.getY();
 
+        getParent().requestDisallowInterceptTouchEvent(true);
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_MOVE:
                 float angle = (float) Math.toDegrees(Math.atan2(y - centerY, x - centerX));
                 if (angle < 0) angle += 360;
 
-                // 5분 단위로 조정
+                // 각도를 5분 단위로 조정
                 angle = Math.round(angle / 1.25f) * 1.25f;
 
                 if (isCloseToStart(x, y)) {
-                    startAngle = angle;
-                    if (startAngle >= endAngle) { // 역방향 방지
-                        startAngle = endAngle - 1.25f; // 5분 단위 조정
+                    float newStartAngle = angle;
+                    if (isAngleConflict(newStartAngle, endAngle)) { // 충돌 검사
+                        newStartAngle = adjustAngleToAvoidConflict(newStartAngle, endAngle, false);
                     }
-                    if (onTimeChangeListener != null) {
-                        onTimeChangeListener.onTimeChange(angleToTime(startAngle), angleToTime(endAngle));
+                    if (newStartAngle != startAngle) {
+                        startAngle = newStartAngle;
+                        notifyTimeChange();
                     }
-                    invalidate();
                 } else if (isCloseToEnd(x, y)) {
-                    endAngle = angle;
-                    if (endAngle <= startAngle) { // 역방향 방지
-                        endAngle = startAngle + 1.25f; // 5분 단위 조정
+                    float newEndAngle = angle;
+                    if (isAngleConflict(startAngle, newEndAngle)) { // 충돌 검사
+                        newEndAngle = adjustAngleToAvoidConflict(startAngle, newEndAngle, true);
                     }
-                    if (onTimeChangeListener != null) {
-                        onTimeChangeListener.onTimeChange(angleToTime(startAngle), angleToTime(endAngle));
+                    if (newEndAngle != endAngle) {
+                        endAngle = newEndAngle;
+                        notifyTimeChange();
                     }
-                    invalidate();
                 }
+                invalidate();
                 break;
         }
         return true;
+    }
+
+    private boolean isAngleConflict(float start, float end) {
+        // 최소 간격 5도(1.25분) 확인
+        return (end - start + 360) % 360 < 5;
+    }
+
+    private float adjustAngleToAvoidConflict(float start, float end, boolean isEnd) {
+        if (isEnd) {
+            // 종료 각도를 최소 간격 이상으로 설정
+            return (start + 5) % 360;
+        } else {
+            // 시작 각도를 최소 간격 이상으로 설정
+            return (end - 5 + 360) % 360;
+        }
+    }
+
+
+    private float adjustStartAngle(float angle) {
+        if (angle >= endAngle) angle = endAngle - 1.25f;
+        return angle;
+    }
+
+    private float adjustEndAngle(float angle) {
+        if (angle <= startAngle) angle = startAngle + 1.25f;
+        return angle;
     }
 
     private boolean isCloseToStart(float x, float y) {
@@ -168,17 +191,28 @@ public class CustomPickerView extends View {
         return Math.hypot(x - endX, y - endY) < 50;
     }
 
+    private void notifyTimeChange() {
+        if (onTimeChangeListener != null) {
+            onTimeChangeListener.onTimeChange(angleToTime(startAngle), angleToTime(endAngle));
+        }
+    }
+
     public String angleToTime(float angle) {
-        int totalMinutes = (int) ((angle / 360) * 24 * 60);
+        // 12시(위쪽)를 0°, 6시(아래쪽)를 180°로 변환
+        float adjustedAngle = (angle + 90) % 360;
+
+        // 각도를 시간과 분으로 변환 (12시간 기준)
+        int totalMinutes = (int) ((adjustedAngle / 360) * 12 * 60);
         int hours = totalMinutes / 60;
         int minutes = totalMinutes % 60;
-        boolean isPM = hours >= 12;
 
-        hours = hours % 12;
-        if (hours == 0) hours = 12;
+        // 오전/오후 처리 (12시간 시계 기준)
+        if (hours == 0) hours = 12; // 오전 12시 처리
 
-        return String.format("%02d:%02d %s", hours, minutes, isPM ? "PM" : "AM");
+        // 시간 형식 반환 (AM/PM 포함)
+        return String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
     }
+
 
     public interface OnTimeChangeListener {
         void onTimeChange(String bedtime, String wakeTime);

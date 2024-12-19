@@ -57,7 +57,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:text="10:00 PM"
+                        android:text="12:00 AM"
                         android:textSize="20sp"
                         android:textColor="@android:color/black"
                         android:textStyle="bold" />
@@ -117,7 +117,7 @@
                 android:layout_marginStart="10dp"
                 android:text="목표 수면 시간"
                 android:textSize="20sp"
-                android:textColor="@android:color/black"
+                android:textColor="@color/black"
                 android:textStyle="bold" />
 
             <!-- 목표 수면 시간 계산된 값을 표시할 TextView -->
@@ -125,7 +125,7 @@
                 android:id="@+id/tv_target_sleep_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="125dp"
+                android:layout_marginStart="80dp"
                 android:text="8h"
                 android:textSize="20sp"
                 android:textColor="@android:color/black"
@@ -185,6 +185,7 @@
             android:layout_below="@id/reminder_section"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="40dp"
+            android:layout_marginBottom="50dp"
             android:background="@drawable/button_rec_setalarm"
             android:text="알람 설정"
             android:textSize="24sp"

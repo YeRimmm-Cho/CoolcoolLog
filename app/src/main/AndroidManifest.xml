@@ -12,9 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CoolcoolLog"
         tools:targetApi="31">
+
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
         <activity
             android:name=".IntroActivity"
             android:exported="true">
@@ -22,8 +24,12 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
+
         </activity>
+
+        <receiver android:name=".AlarmReceiver" />
     </application>
 
 </manifest>

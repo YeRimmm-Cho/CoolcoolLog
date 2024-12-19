@@ -1,8 +1,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="@color/menu_purple" />
 
-    <!-- 모서리 둥글게: 위쪽만 둥글게 -->
-
     <padding
         android:paddingLeft="12dp"
         android:paddingTop="12dp"
