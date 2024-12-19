@@ -1,0 +1,13 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_rec_white">
+
+    <!-- 커스텀 원형 시간 선택기 -->
+    <com.example.coolcoollog.CustomPickerView
+        android:id="@+id/custom_picker_view"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

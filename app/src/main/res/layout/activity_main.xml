@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 프래그먼트가 여기 표시됨 -->
+    <!-- 프래그먼트 컨테이너 -->
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_navigation" />
 
     <!-- 하단 네비게이션 바 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView

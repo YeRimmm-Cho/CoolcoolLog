@@ -1,12 +1,196 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/background_img_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Home 화면"
-        android:textSize="24sp"
-        android:textColor="#000000" />
+    <!-- ScrollView로 스크롤 가능한 영역 감싸기 -->
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Custom 원형 시간 선택기 -->
+            <com.example.coolcoollog.CustomPickerView
+                android:id="@+id/custom_picker_view"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_centerHorizontal="true" />
+
+            <!-- 시간 섹션 -->
+            <LinearLayout
+                android:id="@+id/time_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/custom_picker_view"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/background_rec_white"
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:gravity="center">
+
+                <!-- 취침 시간 -->
+                <LinearLayout
+                    android:id="@+id/bedtime_section"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_bed"
+                        android:contentDescription="Bedtime Icon" />
+
+                    <TextView
+                        android:id="@+id/tv_bedtime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="10:00 PM"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- 기상 시간 -->
+                <LinearLayout
+                    android:id="@+id/wake_time_section"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_bell"
+                        android:contentDescription="Wake Time Icon" />
+
+                    <TextView
+                        android:id="@+id/tv_wake_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="06:00 AM"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+        <!-- 목표 수면 시간 -->
+        <LinearLayout
+            android:id="@+id/goal_sleep_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/time_section"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/background_rec_white"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_check"
+                android:contentDescription="Goal Icon" />
+
+            <TextView
+                android:id="@+id/tv_target_sleep_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="목표 수면 시간"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+            <!-- 목표 수면 시간 계산된 값을 표시할 TextView -->
+            <TextView
+                android:id="@+id/tv_target_sleep_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="125dp"
+                android:text="8h"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/reminder_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/goal_sleep_section"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/background_rec_white"
+            android:orientation="horizontal"
+            android:padding="15dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_reminder_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="알람 리마인더"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold" />
+
+            <!-- 알람 리마인더 입력 -->
+            <EditText
+                android:id="@+id/et_reminder_input"
+                android:layout_width="35dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="120dp"
+                android:inputType="number"
+                android:textSize="20sp"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/tv_reminder_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="min"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <!-- 알람 설정 버튼 -->
+        <Button
+            android:id="@+id/btn_set_alarm"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:padding="15dp"
+            android:layout_below="@id/reminder_section"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/button_rec_setalarm"
+            android:text="알람 설정"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white" />
+
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>
