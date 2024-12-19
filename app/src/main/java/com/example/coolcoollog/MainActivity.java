@@ -1,8 +1,8 @@
 package com.example.coolcoollog;
 
 import android.os.Bundle;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -12,25 +12,35 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // BottomNavigationView 설정
+        // 하단 네비게이션바 설정
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        // 초기 화면으로 HomeFragment 설정
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, new HomeFragment())
+                .commit();
 
         // 메뉴 아이템 선택 이벤트 처리
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
+            Fragment selectedFragment = null;
 
+            int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
-                Toast.makeText(this, "Home 선택됨", Toast.LENGTH_SHORT).show();
-                return true;
+                selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_sleep) {
-                Toast.makeText(this, "Sleep 선택됨", Toast.LENGTH_SHORT).show();
-                return true;
+                selectedFragment = new SleepFragment();
             } else if (itemId == R.id.nav_statistics) {
-                Toast.makeText(this, "Statistics 선택됨", Toast.LENGTH_SHORT).show();
-                return true;
-            } else {
-                return false;
+                selectedFragment = new StatisticsFragment();
             }
+
+            // 선택된 프래그먼트를 화면에 표시
+            if (selectedFragment != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, selectedFragment)
+                        .commit();
+            }
+
+            return true;
         });
     }
 }
