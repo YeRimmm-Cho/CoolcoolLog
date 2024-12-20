@@ -128,29 +128,47 @@ public class HomeFragment extends Fragment {
 
     private void setAlarms() {
         new Thread(() -> {
-            if (TextUtils.isEmpty(wakeTime)) {
-                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "기상 시간을 입력하세요.", Toast.LENGTH_SHORT).show());
+            String wakeTime = tvWakeTime.getText().toString(); // 기상 시간
+            String reminderInput = etReminderInput.getText().toString(); // 리마인더 시간 입력
+
+            if (TextUtils.isEmpty(wakeTime) || TextUtils.isEmpty(reminderInput)) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "기상 시간과 리마인더 시간을 입력하세요.", Toast.LENGTH_SHORT).show());
                 return;
             }
 
             try {
+                int reminderMinutes = Integer.parseInt(reminderInput); // 리마인더 시간(분)을 정수로 변환
                 AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
 
                 if (alarmManager == null) throw new Exception("AlarmManager가 null입니다.");
 
                 // 기상 알람 설정
-                Calendar wakeTimeCal = calculateCalendarTime(wakeTime);
-                setAlarm(alarmManager, wakeTimeCal, "기상 알람입니다!", 0);
+                Calendar wakeTimeCal = calculateCalendarTime(wakeTime); // 기상 알람 시간 계산
+                setAlarm(alarmManager, wakeTimeCal, "wake", 0);
 
-                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "알람이 성공적으로 설정되었습니다.", Toast.LENGTH_SHORT).show());
-                Log.i(TAG, "알람 설정 완료: WakeTime=" + wakeTimeCal.getTime());
+                // 리마인더 알람 설정
+                Calendar reminderCal = (Calendar) wakeTimeCal.clone();
+                reminderCal.add(Calendar.MINUTE, reminderMinutes); // wakeTime + reminderMinutes
+                setAlarm(alarmManager, reminderCal, "reminder", 1);
 
+                // 성공 메시지 및 로그
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "알람이 성공적으로 설정되었습니다.", Toast.LENGTH_SHORT).show());
+                Log.i(TAG, "알람 설정 완료: WakeTime=" + wakeTimeCal.getTime() + ", ReminderTime=" + reminderCal.getTime());
+
+            } catch (NumberFormatException e) {
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "리마인더 시간을 숫자로 입력하세요.", Toast.LENGTH_SHORT).show());
+                Log.e(TAG, "리마인더 입력 오류: " + e.getMessage(), e);
             } catch (Exception e) {
-                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "알람 설정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show());
+                requireActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "알람 설정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show());
                 Log.e(TAG, "알람 설정 중 오류: " + e.getMessage(), e);
             }
         }).start();
     }
+
 
     private Calendar calculateCalendarTime(String time) throws Exception {
         Calendar current = Calendar.getInstance();
