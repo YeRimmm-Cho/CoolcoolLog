@@ -46,6 +46,7 @@ public class StatisticsFragment extends Fragment {
                     break;
             }
         }).attach();
+        tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.light_purple));
     }
 }
 
