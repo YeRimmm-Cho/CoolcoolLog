@@ -17,13 +17,21 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // 전달된 alarmType 확인
-        String alarmType = intent.getStringExtra("alarmType");
+        String alarmType = intent.getStringExtra("alarmType"); // alarmType 가져오기
         String message;
 
-        if ("기상 알람입니다!".equals(alarmType)) {
-            message = "기상 알람입니다!";
-        } else if ("리마인더 알람입니다!".equals(alarmType)) {
-            message = "리마인더 알람입니다!";
+        if (alarmType != null) {
+            switch (alarmType) {
+                case "wake":
+                    message = "기상 알람입니다!";
+                    break;
+                case "reminder":
+                    message = "리마인더 알람입니다!";
+                    break;
+                default:
+                    message = "알람 발생!";
+                    break;
+            }
         } else {
             message = "알람 발생!";
         }
