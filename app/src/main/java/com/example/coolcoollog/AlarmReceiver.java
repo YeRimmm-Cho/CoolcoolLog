@@ -16,18 +16,19 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        // 전달된 alarmType 확인
         String alarmType = intent.getStringExtra("alarmType");
         String message;
 
-        if ("wake".equals(alarmType)) {
+        if ("기상 알람입니다!".equals(alarmType)) {
             message = "기상 알람입니다!";
-        } else if ("reminder".equals(alarmType)) {
+        } else if ("리마인더 알람입니다!".equals(alarmType)) {
             message = "리마인더 알람입니다!";
         } else {
             message = "알람 발생!";
         }
 
-        // Toast도 함께 표시
+        // Toast 표시
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
         // Notification 생성
@@ -55,6 +56,6 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setAutoCancel(true); // 클릭 시 알람 제거
 
         // Notification 표시
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
     }
 }

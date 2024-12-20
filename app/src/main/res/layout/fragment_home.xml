@@ -126,7 +126,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="80dp"
-                android:text="8h"
+                android:text="6h"
                 android:textSize="20sp"
                 android:textColor="@android:color/black"
                 android:textStyle="bold" />

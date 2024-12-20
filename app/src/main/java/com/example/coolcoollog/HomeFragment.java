@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment {
@@ -152,17 +153,32 @@ public class HomeFragment extends Fragment {
     }
 
     private Calendar calculateCalendarTime(String time) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        Calendar alarmTime = Calendar.getInstance();
-        alarmTime.setTime(sdf.parse(time));
+        Calendar current = Calendar.getInstance();
 
-        if (alarmTime.before(Calendar.getInstance())) {
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        Date parsedTime = sdf.parse(time); // 입력된 시간을 파싱
+
+        Calendar alarmTime = Calendar.getInstance();
+        alarmTime.setTime(parsedTime);
+
+        // 시간만 설정하고 날짜 유지
+        alarmTime.set(Calendar.YEAR, current.get(Calendar.YEAR));
+        alarmTime.set(Calendar.MONTH, current.get(Calendar.MONTH));
+        alarmTime.set(Calendar.DATE, current.get(Calendar.DATE));
+
+        // 알람 시간이 현재 시간 이전이면 다음 날로 설정
+        if (alarmTime.before(current)) {
             alarmTime.add(Calendar.DATE, 1);
         }
+
+        Log.d(TAG, "계산된 알람 시간: " + alarmTime.getTime());
         return alarmTime;
     }
 
+
     private void setAlarm(AlarmManager alarmManager, Calendar alarmTime, String alarmType, int requestCode) {
+        Log.d(TAG, "알람 설정 요청: " + alarmTime.getTime()); // 디버깅 로그 추가
+
         Intent intent = new Intent(getContext(), AlarmReceiver.class);
         intent.putExtra("alarmType", alarmType);
 
