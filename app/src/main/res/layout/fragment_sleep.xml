@@ -1,12 +1,77 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#141033">
 
+    <!-- 상단 메시지 -->
     <TextView
+        android:id="@+id/tv_goodnight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Sleep 화면"
+        android:layout_marginTop="80dp"
+        android:layout_centerHorizontal="true"
+        android:text="Good Night !"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
+
+    <!-- 현재 시간 -->
+    <TextView
+        android:id="@+id/tv_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_goodnight"
+        android:layout_marginTop="25dp"
+        android:layout_centerHorizontal="true"
+        android:text="00:00"
+        android:textSize="60sp"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
+
+    <!-- 알람 시간 -->
+    <TextView
+        android:id="@+id/tv_alarm_time"
+        android:background="@drawable/button_rec_setalarm"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_current_time"
+        android:padding="10dp"
+        android:paddingStart="15dp"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:drawableLeft="@drawable/ic_alarm"
+        android:drawablePadding="8dp"
+        android:text="06:00 AM"
         android:textSize="24sp"
-        android:textColor="#000000" />
+        android:textColor="@color/white" />
+
+
+    <!-- 수면 이미지 -->
+    <ImageView
+        android:id="@+id/img_sleep"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_below="@id/tv_alarm_time"
+        android:layout_marginTop="130dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/img_sleep"
+        android:scaleType="centerCrop" />
+
+
+    <!-- 수면 시작 버튼 -->
+    <Button
+        android:id="@+id/btn_start_sleeping"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img_sleep"
+        android:background="@drawable/button_rec_start"
+        android:layout_marginTop="40dp"
+        android:layout_centerHorizontal="true"
+        android:text="Start Sleeping !"
+        android:padding="15dp"
+        android:textColor="#141033"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        />
+
 </RelativeLayout>
