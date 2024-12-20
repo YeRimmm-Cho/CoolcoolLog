@@ -33,6 +33,7 @@ public class HomeFragment extends Fragment {
     private Button btnSetAlarm;
 
     private boolean hasCheckedPermission = false; // 권한 체크 여부
+    private String wakeTime = "06:00 AM"; // 기본 기상 시간
 
     @Nullable
     @Override
@@ -56,6 +57,7 @@ public class HomeFragment extends Fragment {
                 tvBedtime.setText(formattedBedtime);
                 tvWakeTime.setText(formattedWakeTime);
 
+                this.wakeTime = formattedWakeTime; // 기상 시간을 업데이트
                 calculateTargetSleepTime(formattedBedtime, formattedWakeTime);
                 Log.d(TAG, "시간 업데이트: Bedtime = " + formattedBedtime + ", WakeTime = " + formattedWakeTime);
             } catch (Exception e) {
@@ -67,6 +69,7 @@ public class HomeFragment extends Fragment {
         btnSetAlarm.setOnClickListener(v -> {
             Log.d(TAG, "알람 설정 버튼 클릭됨");
             setAlarms();
+            moveToSleepFragment(); // 알람 설정 후 SleepFragment로 이동
         });
 
         return view;
@@ -124,16 +127,12 @@ public class HomeFragment extends Fragment {
 
     private void setAlarms() {
         new Thread(() -> {
-            String wakeTime = tvWakeTime.getText().toString();
-            String reminderInput = etReminderInput.getText().toString();
-
-            if (TextUtils.isEmpty(wakeTime) || TextUtils.isEmpty(reminderInput)) {
-                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "기상 시간과 리마인더를 입력하세요.", Toast.LENGTH_SHORT).show());
+            if (TextUtils.isEmpty(wakeTime)) {
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "기상 시간을 입력하세요.", Toast.LENGTH_SHORT).show());
                 return;
             }
 
             try {
-                int reminderMinutes = Integer.parseInt(reminderInput);
                 AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
 
                 if (alarmManager == null) throw new Exception("AlarmManager가 null입니다.");
@@ -142,24 +141,15 @@ public class HomeFragment extends Fragment {
                 Calendar wakeTimeCal = calculateCalendarTime(wakeTime);
                 setAlarm(alarmManager, wakeTimeCal, "기상 알람입니다!", 0);
 
-                // 리마인더 알람 계산
-                Calendar reminderCal = (Calendar) wakeTimeCal.clone();
-                reminderCal.add(Calendar.MINUTE, reminderMinutes); // wakeTime + reminderMinutes
-                setAlarm(alarmManager, reminderCal, "리마인더 알람입니다!", 1);
-
                 requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "알람이 성공적으로 설정되었습니다.", Toast.LENGTH_SHORT).show());
-                Log.i(TAG, "알람 설정 완료: WakeTime=" + wakeTimeCal.getTime() + ", ReminderTime=" + reminderCal.getTime());
+                Log.i(TAG, "알람 설정 완료: WakeTime=" + wakeTimeCal.getTime());
 
-            } catch (NumberFormatException e) {
-                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "리마인더 시간을 숫자로 입력하세요.", Toast.LENGTH_SHORT).show());
-                Log.e(TAG, "리마인더 입력 오류: " + e.getMessage(), e);
             } catch (Exception e) {
                 requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "알람 설정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show());
                 Log.e(TAG, "알람 설정 중 오류: " + e.getMessage(), e);
             }
         }).start();
     }
-
 
     private Calendar calculateCalendarTime(String time) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
@@ -171,14 +161,6 @@ public class HomeFragment extends Fragment {
         }
         return alarmTime;
     }
-
-    private Calendar calculateReminderTime(Calendar wakeTimeCal, int reminderMinutes) {
-        Calendar reminderCal = (Calendar) wakeTimeCal.clone();
-        reminderCal.add(Calendar.MINUTE, reminderMinutes); // wakeTime + reminderMinutes
-        Log.d(TAG, "리마인더 시간 계산 완료: " + reminderCal.getTime());
-        return reminderCal;
-    }
-
 
     private void setAlarm(AlarmManager alarmManager, Calendar alarmTime, String alarmType, int requestCode) {
         Intent intent = new Intent(getContext(), AlarmReceiver.class);
@@ -192,5 +174,19 @@ public class HomeFragment extends Fragment {
         );
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), pendingIntent);
+    }
+
+    private void moveToSleepFragment() {
+        Bundle bundle = new Bundle();
+        bundle.putString("alarmTime", wakeTime); // 설정한 기상 시간을 전달
+
+        SleepFragment sleepFragment = new SleepFragment();
+        sleepFragment.setArguments(bundle);
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, sleepFragment)
+                .addToBackStack(null)
+                .commit();
     }
 }
