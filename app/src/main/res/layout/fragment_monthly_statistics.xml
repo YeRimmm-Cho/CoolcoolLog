@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/background_img_main">
+
+    <!-- 월간 날짜 표시 -->
+    <TextView
+        android:id="@+id/monthTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="2024년 11월"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- 평균과 최장 시간 -->
+    <LinearLayout
+        android:id="@+id/averageAndMaxContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/monthTextView"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/averageTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="평균: 8h"
+            android:textColor="@color/light_purple"
+            android:textSize="16sp"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/maxTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="최장: 10h"
+            android:textColor="@color/light_purple"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- 수면 패턴 그래프 -->
+    <com.example.coolcoollog.CustomGraphView
+        android:id="@+id/sleepGraphView"
+        android:background="@drawable/button_rec_setalarm"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/averageAndMaxContainer"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>

@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/background_img_main">
+
+    <!-- 날짜 표시 -->
+    <TextView
+        android:id="@+id/dateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="2024년 11월 21일"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- 목표와 수면 시간 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dateTextView"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/goalTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="목표: 7h"
+            android:textColor="@color/light_purple"
+            android:textSize="16sp"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/sleepTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="수면 시간: 6h"
+            android:textColor="@color/light_purple"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- 달성률 -->
+    <TextView
+        android:id="@+id/achievementPercentageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="85%"
+        android:textColor="@color/light_purple"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+</RelativeLayout>
