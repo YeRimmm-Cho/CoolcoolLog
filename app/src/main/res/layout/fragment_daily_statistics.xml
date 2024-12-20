@@ -9,47 +9,125 @@
         android:id="@+id/dateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="5dp"
         android:text="2024년 11월 21일"
         android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textSize="24sp"
+        android:textStyle="bold"
+ />
 
     <!-- 목표와 수면 시간 -->
     <LinearLayout
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/dateTextView"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
-        <TextView
-            android:id="@+id/goalTextView"
-            android:layout_width="wrap_content"
+        <!-- 목표 시간 카드 -->
+        <LinearLayout
+            android:id="@+id/goalCard"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="목표: 7h"
-            android:textColor="@color/light_purple"
-            android:textSize="16sp"
-            android:layout_marginEnd="16dp" />
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp"
+            android:background="@drawable/background_rec_light_purple">
 
-        <TextView
-            android:id="@+id/sleepTextView"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/goalTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="목표 시간"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/goalTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7h"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 수면 시간 카드 -->
+        <LinearLayout
+            android:id="@+id/sleepCard"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="수면 시간: 6h"
-            android:textColor="@color/light_purple"
-            android:textSize="16sp" />
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="16dp"
+            android:background="@drawable/background_rec_light_purple">
+
+            <TextView
+                android:id="@+id/sleepTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수면 시간"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/sleepTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6h"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- 달성률 -->
+    <!-- Progress 그룹 -->
+    <RelativeLayout
+        android:id="@+id/progressGroup"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_below="@id/cardView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp">
+
+        <!-- CustomProgressView -->
+        <com.example.coolcoollog.CustomProgressView
+            android:id="@+id/customProgressView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- 중앙 아이콘 -->
+        <ImageView
+            android:id="@+id/centerIcon"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_moon"
+            android:contentDescription="Moon Icon" />
+    </RelativeLayout>
+
+    <!-- 퍼센트 텍스트 -->
     <TextView
-        android:id="@+id/achievementPercentageText"
+        android:id="@+id/percentageText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_below="@id/progressGroup"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         android:text="85%"
-        android:textColor="@color/light_purple"
-        android:textSize="24sp"
+        android:textColor="@color/white"
+        android:textSize="36sp"
         android:textStyle="bold" />
+
 </RelativeLayout>

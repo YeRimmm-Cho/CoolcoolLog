@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,7 +25,7 @@ public class SleepFragment extends Fragment {
     private Runnable timeUpdater;
     private SimpleDateFormat timeFormat; // 시간 포맷 선언
     private String alarmTime = "06:00 AM"; // 기본 알람 시간
-    private long sleepStartTime; // 수면 시작 시간 (밀리초)
+    private long sleepStartTime = 0; // 수면 시작 시간 (밀리초)
 
     @Nullable
     @Override
@@ -38,7 +39,7 @@ public class SleepFragment extends Fragment {
 
         // HomeFragment에서 알람 시간 전달받기
         if (getArguments() != null) {
-            alarmTime = getArguments().getString("alarmTime", "06:00 AM");
+            alarmTime = getArguments().getString("wakeTime", alarmTime); // 전달된 wakeTime 값으로 초기화
             tvAlarmTime.setText(alarmTime);
         }
 
@@ -54,7 +55,7 @@ public class SleepFragment extends Fragment {
         // 수면 시작 버튼 클릭 이벤트
         btnStartSleeping.setOnClickListener(v -> {
             sleepStartTime = System.currentTimeMillis(); // 수면 시작 시간 기록
-            moveToStatisticsFragment(); // StatisticsFragment로 이동
+            storeSleepData(); // 시간 데이터를 저장
         });
 
         return view;
@@ -87,20 +88,18 @@ public class SleepFragment extends Fragment {
         handler.post(timeUpdater);
     }
 
-    private void moveToStatisticsFragment() {
-        // StatisticsFragment로 데이터 전달
-        StatisticsFragment statisticsFragment = new StatisticsFragment();
-        Bundle bundle = new Bundle();
-        bundle.putLong("sleepStartTime", sleepStartTime); // 수면 시작 시간 전달
-        bundle.putString("alarmTime", alarmTime); // 알람 시간 전달
-        statisticsFragment.setArguments(bundle);
 
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, statisticsFragment)
-                .addToBackStack(null)
-                .commit();
+    private void storeSleepData() {
+        if (getArguments() != null) {
+            getArguments().putLong("sleepStartTime", sleepStartTime);
+            getArguments().putString("bedtime", new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(new Date(sleepStartTime))); // 취침 시간
+            getArguments().putString("wakeTime", alarmTime); // 전달받은 wakeTime 값 사용
+        }
+
+        // 사용자에게 알림
+        Toast.makeText(getContext(), "수면 기록이 시작되었습니다.", Toast.LENGTH_SHORT).show();
     }
+
 
     @Override
     public void onDestroyView() {

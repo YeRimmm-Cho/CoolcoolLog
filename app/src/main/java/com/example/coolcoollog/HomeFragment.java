@@ -212,7 +212,8 @@ public class HomeFragment extends Fragment {
 
     private void moveToSleepFragment() {
         Bundle bundle = new Bundle();
-        bundle.putString("alarmTime", wakeTime); // 설정한 기상 시간을 전달
+        bundle.putString("bedtime", tvBedtime.getText().toString()); // 취침 시간
+        bundle.putString("wakeTime", this.wakeTime); // 최신 업데이트된 기상 시간 전달
 
         SleepFragment sleepFragment = new SleepFragment();
         sleepFragment.setArguments(bundle);
@@ -223,4 +224,6 @@ public class HomeFragment extends Fragment {
                 .addToBackStack(null)
                 .commit();
     }
+
+
 }
