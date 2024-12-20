@@ -26,27 +26,13 @@ import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
-    private void checkAndRequestExactAlarmPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                startActivity(intent);
-            }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        checkAndRequestExactAlarmPermission();
-    }
-
     private static final String TAG = "HomeFragment";
 
     private TextView tvBedtime, tvWakeTime, tvTargetSleepTime;
     private EditText etReminderInput;
     private Button btnSetAlarm;
+
+    private boolean hasCheckedPermission = false; // 권한 체크 여부
 
     @Nullable
     @Override
@@ -86,6 +72,25 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!hasCheckedPermission) {
+            checkAndRequestExactAlarmPermission();
+            hasCheckedPermission = true; // 권한 체크는 한 번만 수행
+        }
+    }
+
+    private void checkAndRequestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12 이상
+            AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivity(intent);
+            }
+        }
+    }
+
     private String formatTimeWithAmPm(String time) throws Exception {
         if (!time.contains("AM") && !time.contains("PM")) {
             time = time + " AM";
@@ -118,55 +123,62 @@ public class HomeFragment extends Fragment {
     }
 
     private void setAlarms() {
-        String wakeTime = tvWakeTime.getText().toString();
-        String reminderInput = etReminderInput.getText().toString();
+        new Thread(() -> {
+            String wakeTime = tvWakeTime.getText().toString();
+            String reminderInput = etReminderInput.getText().toString();
 
-        if (TextUtils.isEmpty(wakeTime) || TextUtils.isEmpty(reminderInput)) {
-            Toast.makeText(getContext(), "기상 시간과 리마인더를 입력하세요.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "알람 설정 실패: wakeTime 또는 reminderInput이 비어 있음");
-            return;
-        }
-
-        try {
-            int reminderMinutes = Integer.parseInt(reminderInput);
-            AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-
-            if (alarmManager == null) {
-                Log.e(TAG, "AlarmManager를 가져올 수 없음");
-                throw new Exception("AlarmManager가 null입니다.");
+            if (TextUtils.isEmpty(wakeTime) || TextUtils.isEmpty(reminderInput)) {
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "기상 시간과 리마인더를 입력하세요.", Toast.LENGTH_SHORT).show());
+                return;
             }
 
-            Calendar wakeTimeCal = calculateCalendarTime(wakeTime);
-            setAlarm(alarmManager, wakeTimeCal, "wake", 0);
+            try {
+                int reminderMinutes = Integer.parseInt(reminderInput);
+                AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
 
-            Calendar reminderCal = calculateReminderTime(wakeTime, reminderMinutes);
-            setAlarm(alarmManager, reminderCal, "reminder", 1);
+                if (alarmManager == null) throw new Exception("AlarmManager가 null입니다.");
 
-            Toast.makeText(getContext(), "알람이 성공적으로 설정되었습니다.", Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "알람 설정 완료");
+                // 기상 알람 설정
+                Calendar wakeTimeCal = calculateCalendarTime(wakeTime);
+                setAlarm(alarmManager, wakeTimeCal, "기상 알람입니다!", 0);
 
-            SleepFragment sleepFragment = new SleepFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("alarmTime", wakeTime);
-            sleepFragment.setArguments(bundle);
+                // 리마인더 알람 계산
+                Calendar reminderCal = (Calendar) wakeTimeCal.clone();
+                reminderCal.add(Calendar.MINUTE, reminderMinutes); // wakeTime + reminderMinutes
+                setAlarm(alarmManager, reminderCal, "리마인더 알람입니다!", 1);
 
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, sleepFragment)
-                    .addToBackStack(null)
-                    .commit();
-        } catch (Exception e) {
-            Toast.makeText(getContext(), "알람 설정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "알람 설정 중 오류: " + e.getMessage(), e);
-        }
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "알람이 성공적으로 설정되었습니다.", Toast.LENGTH_SHORT).show());
+                Log.i(TAG, "알람 설정 완료: WakeTime=" + wakeTimeCal.getTime() + ", ReminderTime=" + reminderCal.getTime());
+
+            } catch (NumberFormatException e) {
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "리마인더 시간을 숫자로 입력하세요.", Toast.LENGTH_SHORT).show());
+                Log.e(TAG, "리마인더 입력 오류: " + e.getMessage(), e);
+            } catch (Exception e) {
+                requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "알람 설정 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show());
+                Log.e(TAG, "알람 설정 중 오류: " + e.getMessage(), e);
+            }
+        }).start();
     }
+
 
     private Calendar calculateCalendarTime(String time) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(sdf.parse(time));
-        return calendar;
+        Calendar alarmTime = Calendar.getInstance();
+        alarmTime.setTime(sdf.parse(time));
+
+        if (alarmTime.before(Calendar.getInstance())) {
+            alarmTime.add(Calendar.DATE, 1);
+        }
+        return alarmTime;
     }
+
+    private Calendar calculateReminderTime(Calendar wakeTimeCal, int reminderMinutes) {
+        Calendar reminderCal = (Calendar) wakeTimeCal.clone();
+        reminderCal.add(Calendar.MINUTE, reminderMinutes); // wakeTime + reminderMinutes
+        Log.d(TAG, "리마인더 시간 계산 완료: " + reminderCal.getTime());
+        return reminderCal;
+    }
+
 
     private void setAlarm(AlarmManager alarmManager, Calendar alarmTime, String alarmType, int requestCode) {
         Intent intent = new Intent(getContext(), AlarmReceiver.class);
@@ -180,13 +192,5 @@ public class HomeFragment extends Fragment {
         );
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), pendingIntent);
-        Log.d(TAG, "알람 설정 완료: 시간 = " + alarmTime.getTime() + ", 유형 = " + alarmType);
-    }
-
-    private Calendar calculateReminderTime(String wakeTime, int reminderMinutes) throws Exception {
-        Calendar wakeTimeCal = calculateCalendarTime(wakeTime);
-        wakeTimeCal.add(Calendar.MINUTE, -reminderMinutes);
-        Log.d(TAG, "리마인더 시간 계산 완료: " + wakeTimeCal.getTime());
-        return wakeTimeCal;
     }
 }

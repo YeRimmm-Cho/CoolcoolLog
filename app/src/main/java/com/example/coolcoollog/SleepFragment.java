@@ -3,10 +3,10 @@ package com.example.coolcoollog;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,6 +23,8 @@ public class SleepFragment extends Fragment {
     private Handler handler;
     private Runnable timeUpdater;
     private SimpleDateFormat timeFormat; // 시간 포맷 선언
+    private String alarmTime = "06:00 AM"; // 기본 알람 시간
+    private long sleepStartTime; // 수면 시작 시간 (밀리초)
 
     @Nullable
     @Override
@@ -32,10 +34,11 @@ public class SleepFragment extends Fragment {
         // 뷰 초기화
         tvCurrentTime = view.findViewById(R.id.tv_current_time);
         tvAlarmTime = view.findViewById(R.id.tv_alarm_time);
+        Button btnStartSleeping = view.findViewById(R.id.btn_start_sleeping);
 
         // HomeFragment에서 알람 시간 전달받기
         if (getArguments() != null) {
-            String alarmTime = getArguments().getString("alarmTime", "06:00 AM");
+            alarmTime = getArguments().getString("alarmTime", "06:00 AM");
             tvAlarmTime.setText(alarmTime);
         }
 
@@ -45,12 +48,35 @@ public class SleepFragment extends Fragment {
         // 시간 포맷 초기화
         timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
-        // 현재 시간 업데이트를 위한 핸들러 초기화
-        handler = new Handler(Looper.getMainLooper());
+        // 현재 시간 업데이트 시작
+        startClock();
+
+        // 수면 시작 버튼 클릭 이벤트
+        btnStartSleeping.setOnClickListener(v -> {
+            sleepStartTime = System.currentTimeMillis(); // 수면 시작 시간 기록
+            moveToStatisticsFragment(); // StatisticsFragment로 이동
+        });
+
+        return view;
+    }
+
+    private void setAlarmIconSize(TextView textView) {
+        Drawable alarmIcon = getResources().getDrawable(R.drawable.ic_alarm, null);
+        int iconSize = dpToPx(25);
+        alarmIcon.setBounds(0, 0, iconSize, iconSize);
+        textView.setCompoundDrawables(alarmIcon, null, null, null);
+    }
+
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
+
+    private void startClock() {
+        handler = new Handler();
         timeUpdater = new Runnable() {
             @Override
             public void run() {
-                // 현재 시간 가져오기
                 String currentTime = timeFormat.format(new Date());
                 tvCurrentTime.setText(currentTime);
 
@@ -58,47 +84,32 @@ public class SleepFragment extends Fragment {
                 handler.postDelayed(this, 1000);
             }
         };
-
-        // 시간 업데이트 시작
         handler.post(timeUpdater);
-
-        return view;
     }
 
-    private void setAlarmIconSize(TextView textView) {
-        // 알람 아이콘 가져오기
-        Drawable alarmIcon = getResources().getDrawable(R.drawable.ic_alarm, null);
+    private void moveToStatisticsFragment() {
+        // StatisticsFragment로 데이터 전달
+        StatisticsFragment statisticsFragment = new StatisticsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putLong("sleepStartTime", sleepStartTime); // 수면 시작 시간 전달
+        bundle.putString("alarmTime", alarmTime); // 알람 시간 전달
+        statisticsFragment.setArguments(bundle);
 
-        // 아이콘 크기 설정 (픽셀 단위)
-        int iconSize = dpToPx(25);
-        alarmIcon.setBounds(0, 0, iconSize, iconSize);
-
-        // 아이콘을 TextView의 왼쪽에 설정
-        textView.setCompoundDrawables(alarmIcon, null, null, null);
-    }
-
-    // DP를 PX로 변환하는 유틸리티 메서드
-    private int dpToPx(int dp) {
-        float density = getResources().getDisplayMetrics().density;
-        return Math.round(dp * density);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        // 핸들러 정리 (프래그먼트가 비활성화될 때)
-        stopTimeUpdater();
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, statisticsFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // 핸들러 정리 (메모리 누수 방지)
-        stopTimeUpdater();
+        stopClock();
     }
 
-    private void stopTimeUpdater() {
-        if (handler != null) {
+    private void stopClock() {
+        if (handler != null && timeUpdater != null) {
             handler.removeCallbacks(timeUpdater);
         }
     }
