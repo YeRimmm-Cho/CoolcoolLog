@@ -12,20 +12,24 @@ import androidx.fragment.app.Fragment;
 import com.example.coolcoollog.view.CustomGraphView;
 
 public class WeeklyStatisticsFragment extends Fragment {
+    private CustomGraphView graphView;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weekly_statistics, container, false);
 
-        // CustomGraphView에 데이터 전달
-        CustomGraphView graphView = view.findViewById(R.id.sleepGraphView);
-        float[] weeklyData = {8f, 9f, 7f, 6f, 10f}; // 주간 데이터
-        String[] weeklyLabels = {"Mon", "Tue", "Wed", "Thu", "Fri"}; // X축 레이블
-        graphView.setData(weeklyData, weeklyLabels);
+        graphView = view.findViewById(R.id.sleepGraphView);
+
+        // 주간 데이터 (7일)
+        float[] dataPoints = {7f, 8f, 6f, 9f, 8f, 7f, 6f};
+        String[] labels = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+
+        graphView.setData(dataPoints, labels);
+        graphView.setLabelInterval(1); // 모든 X축 레이블 표시
 
         return view;
     }
 }
+
 
 
