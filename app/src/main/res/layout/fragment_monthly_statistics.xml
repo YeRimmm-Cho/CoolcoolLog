@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
         android:layout_marginTop="20dp"
-        android:text="2024년 11월"
+        android:text="2024년 12월"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold" />

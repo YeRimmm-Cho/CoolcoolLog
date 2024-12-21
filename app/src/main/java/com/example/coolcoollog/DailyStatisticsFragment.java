@@ -1,6 +1,7 @@
 package com.example.coolcoollog;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.coolcoollog.data.dao.SleepRecordDao;
+import com.example.coolcoollog.data.database.AppDatabase;
+import com.example.coolcoollog.data.entity.SleepRecord;
 import com.example.coolcoollog.view.CustomProgressView;
 
 import java.text.SimpleDateFormat;
@@ -18,12 +22,12 @@ import java.util.Locale;
 
 public class DailyStatisticsFragment extends Fragment {
 
+    private static final String TAG = "DailyStatisticsFragment";
+
     private TextView tvDate, tvActualSleepTime, tvTargetSleepTime, tvPercentage;
     private CustomProgressView customProgressView;
 
-    private String bedtime = "11:00 PM"; // 기본 취침 시간
-    private String wakeTime = "06:00 AM"; // 기본 기상 시간
-    private long sleepStartTime = 0; // 기본 수면 시작 시간
+    private SleepRecordDao sleepRecordDao; // 데이터베이스 DAO
 
     @Nullable
     @Override
@@ -42,78 +46,88 @@ public class DailyStatisticsFragment extends Fragment {
         tvPercentage = view.findViewById(R.id.percentageText);
         customProgressView = view.findViewById(R.id.customProgressView);
 
+        // Room Database 초기화
+        AppDatabase db = AppDatabase.getInstance(getContext());
+        sleepRecordDao = db.sleepRecordDao();
+
         // 현재 날짜 설정
         String currentDate = new SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault()).format(Calendar.getInstance().getTime());
         tvDate.setText(currentDate);
 
-        // 전달받은 데이터 가져오기
-        if (getArguments() != null) {
-            bedtime = getArguments().getString("bedtime", bedtime);
-            wakeTime = getArguments().getString("wakeTime", wakeTime);
-            sleepStartTime = getArguments().getLong("sleepStartTime", 0);
-        }
-
-        // 목표 수면 시간 계산
-        int targetSleepHours = calculateTargetSleepHours(bedtime, wakeTime);
-        tvTargetSleepTime.setText(String.format(Locale.getDefault(), "%dh", targetSleepHours));
-
-        // 실제 수면 시간 계산
-        int actualSleepHours = calculateActualSleepHours(sleepStartTime, wakeTime);
-        tvActualSleepTime.setText(String.format(Locale.getDefault(), "%dh", actualSleepHours));
-
-        // 퍼센트 및 CustomProgressView 업데이트
-        updatePercentageAndProgressView(actualSleepHours, targetSleepHours);
+        // 데이터베이스에서 수면 데이터 가져오기
+        loadSleepData();
     }
 
-    private int calculateTargetSleepHours(String bedtime, String wakeTime) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-            Calendar bedtimeCal = Calendar.getInstance();
-            Calendar wakeTimeCal = Calendar.getInstance();
+    private void loadSleepData() {
+        new Thread(() -> {
+            try {
+                // 현재 날짜 가져오기
+                String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
 
-            // 시간 파싱
-            bedtimeCal.setTime(sdf.parse(bedtime));
-            wakeTimeCal.setTime(sdf.parse(wakeTime));
+                // 오늘의 SleepRecord 가져오기 (최신 데이터 기준)
+                SleepRecord record = sleepRecordDao.getLatestRecordByDate(todayDate);
 
-            // 기상 시간이 취침 시간보다 빠를 경우 다음 날로 처리
-            if (wakeTimeCal.before(bedtimeCal)) {
-                wakeTimeCal.add(Calendar.DATE, 1);
+                int actualSleepMinutes;
+                int targetSleepMinutes;
+
+                if (record != null) {
+                    actualSleepMinutes = record.getActualSleepMinutes();
+                    targetSleepMinutes = record.getTargetSleepMinutes();
+                    Log.d(TAG, "데이터베이스에서 수면 데이터 조회 성공: " +
+                            "Actual Sleep = " + actualSleepMinutes + "분, Target Sleep = " + targetSleepMinutes + "분");
+                } else {
+                    // 기본값 설정
+                    actualSleepMinutes = 390; // 6h 30m
+                    targetSleepMinutes = 480; // 8h 0m
+                    Log.d(TAG, "데이터베이스에 기록 없음, 기본값 사용: " +
+                            "Actual Sleep = " + actualSleepMinutes + "분, Target Sleep = " + targetSleepMinutes + "분");
+
+                    // 기본값을 바로 UI에 반영
+                    requireActivity().runOnUiThread(() -> {
+                        tvActualSleepTime.setText(formatSleepTime(actualSleepMinutes));
+                        tvTargetSleepTime.setText(formatSleepTime(targetSleepMinutes));
+                        updatePercentageAndProgressView(actualSleepMinutes, targetSleepMinutes);
+                    });
+                    return; // 여기서 종료하여 불필요한 작업 방지
+                }
+
+                // 시간 및 분 계산
+                String actualSleepTimeText = formatSleepTime(actualSleepMinutes);
+                String targetSleepTimeText = formatSleepTime(targetSleepMinutes);
+
+                // UI 업데이트
+                requireActivity().runOnUiThread(() -> {
+                    tvActualSleepTime.setText(actualSleepTimeText);
+                    tvTargetSleepTime.setText(targetSleepTimeText);
+                    updatePercentageAndProgressView(actualSleepMinutes, targetSleepMinutes);
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "수면 데이터 로드 중 오류 발생", e);
             }
+        }).start();
+    }
 
-            long diffMillis = wakeTimeCal.getTimeInMillis() - bedtimeCal.getTimeInMillis();
-            return (int) (diffMillis / (1000 * 60 * 60)); // 시간 단위로 변환
-        } catch (Exception e) {
-            return 0; // 오류 발생 시 기본값 반환
+    private String formatSleepTime(int totalMinutes) {
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+
+        if (minutes == 0) {
+            return String.format(Locale.getDefault(), "%dh", hours); // 0분일 경우
+        } else {
+            return String.format(Locale.getDefault(), "%dh %dm", hours, minutes); // h m 형식
         }
     }
 
-    private int calculateActualSleepHours(long sleepStartTime, String wakeTime) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-            Calendar wakeTimeCal = Calendar.getInstance();
-
-            wakeTimeCal.setTime(sdf.parse(wakeTime));
-
-            // 기상 시간이 수면 시작 시간보다 빠를 경우 다음 날로 처리
-            if (wakeTimeCal.getTimeInMillis() < sleepStartTime) {
-                wakeTimeCal.add(Calendar.DATE, 1);
-            }
-
-            long diffMillis = wakeTimeCal.getTimeInMillis() - sleepStartTime;
-            return (int) (diffMillis / (1000 * 60 * 60)); // 시간 단위로 변환
-        } catch (Exception e) {
-            return -1; // 오류 발생 시 기본값 반환
-        }
-    }
-
-    private void updatePercentageAndProgressView(int actualSleepHours, int targetSleepHours) {
-        if (targetSleepHours > 0 && actualSleepHours >= 0) {
-            int percentage = (int) ((actualSleepHours / (float) targetSleepHours) * 100);
+    private void updatePercentageAndProgressView(int actualSleepMinutes, int targetSleepMinutes) {
+        if (targetSleepMinutes > 0 && actualSleepMinutes >= 0) {
+            int percentage = (int) ((actualSleepMinutes / (float) targetSleepMinutes) * 100);
             tvPercentage.setText(String.format(Locale.getDefault(), "%d%%", percentage));
-            customProgressView.setProgress(percentage); // CustomProgressView 업데이트
+            customProgressView.setProgress(percentage);
+            Log.d(TAG, "목표 달성률 계산 성공: " + percentage + "%");
         } else {
             tvPercentage.setText("--%");
-            customProgressView.setProgress(0); // 진행률 0으로 설정
+            customProgressView.setProgress(0);
+            Log.d(TAG, "목표 달성률 계산 실패: 대상 값이 잘못되었습니다.");
         }
     }
 }

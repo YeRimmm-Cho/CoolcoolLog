@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="5dp"
-        android:text="2024년 11월 셋째 주"
+        android:text="2024년 12월 셋째 주"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold" />
