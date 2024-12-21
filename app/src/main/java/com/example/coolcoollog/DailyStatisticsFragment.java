@@ -64,34 +64,32 @@ public class DailyStatisticsFragment extends Fragment {
                 // 현재 날짜 가져오기
                 String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
 
-                // 오늘의 SleepRecord 가져오기 (최신 데이터 기준)
+                // 오늘의 SleepRecord 가져오기
                 SleepRecord record = sleepRecordDao.getLatestRecordByDate(todayDate);
 
-                int actualSleepMinutes;
-                int targetSleepMinutes;
+                // 기본값 초기화
+                final int actualSleepMinutes;
+                final int targetSleepMinutes;
 
                 if (record != null) {
-                    actualSleepMinutes = record.getActualSleepMinutes();
-                    targetSleepMinutes = record.getTargetSleepMinutes();
-                    Log.d(TAG, "데이터베이스에서 수면 데이터 조회 성공: " +
-                            "Actual Sleep = " + actualSleepMinutes + "분, Target Sleep = " + targetSleepMinutes + "분");
-                } else {
-                    // 기본값 설정
-                    actualSleepMinutes = 390; // 6h 30m
-                    targetSleepMinutes = 480; // 8h 0m
-                    Log.d(TAG, "데이터베이스에 기록 없음, 기본값 사용: " +
-                            "Actual Sleep = " + actualSleepMinutes + "분, Target Sleep = " + targetSleepMinutes + "분");
+                    // 수면 시간 계산
+                    actualSleepMinutes = calculateActualSleepMinutes(record.getActualSleepStartMinutes(), record.getWakeTimeMinutes());
 
-                    // 기본값을 바로 UI에 반영
-                    requireActivity().runOnUiThread(() -> {
-                        tvActualSleepTime.setText(formatSleepTime(actualSleepMinutes));
-                        tvTargetSleepTime.setText(formatSleepTime(targetSleepMinutes));
-                        updatePercentageAndProgressView(actualSleepMinutes, targetSleepMinutes);
-                    });
-                    return; // 여기서 종료하여 불필요한 작업 방지
+                    // TargetSleepMinutes 계산 (알람 시간 - 취침 시간)
+                    if (record.getWakeTimeMinutes() >= record.getActualSleepStartMinutes()) {
+                        targetSleepMinutes = record.getWakeTimeMinutes() - record.getActualSleepStartMinutes();
+                    } else {
+                        targetSleepMinutes = (1440 - record.getActualSleepStartMinutes()) + record.getWakeTimeMinutes();
+                    }
+
+                    Log.d(TAG, "데이터베이스에서 수면 데이터 조회 성공: Actual Sleep = " + actualSleepMinutes + "분, Target Sleep = " + targetSleepMinutes + "분");
+                } else {
+                    Log.d(TAG, "데이터베이스에 기록 없음, 기본값 사용");
+                    actualSleepMinutes = 0;
+                    targetSleepMinutes = 480; // 기본값 (8시간)
                 }
 
-                // 시간 및 분 계산
+                // 시간 포맷으로 변환
                 String actualSleepTimeText = formatSleepTime(actualSleepMinutes);
                 String targetSleepTimeText = formatSleepTime(targetSleepMinutes);
 
@@ -105,6 +103,20 @@ public class DailyStatisticsFragment extends Fragment {
                 Log.e(TAG, "수면 데이터 로드 중 오류 발생", e);
             }
         }).start();
+    }
+
+
+    private int calculateActualSleepMinutes(int sleepStartMinutes, int wakeTimeMinutes) {
+        if (sleepStartMinutes < 0 || wakeTimeMinutes < 0 || sleepStartMinutes > 1440 || wakeTimeMinutes > 1440) {
+            Log.e(TAG, "잘못된 시간 값: SleepStart=" + sleepStartMinutes + ", WakeTime=" + wakeTimeMinutes);
+            return 0; // 비정상적인 값 처리
+        }
+
+        if (wakeTimeMinutes >= sleepStartMinutes) {
+            return wakeTimeMinutes - sleepStartMinutes; // 같은 날
+        } else {
+            return (1440 - sleepStartMinutes) + wakeTimeMinutes; // 자정을 넘긴 경우
+        }
     }
 
     private String formatSleepTime(int totalMinutes) {

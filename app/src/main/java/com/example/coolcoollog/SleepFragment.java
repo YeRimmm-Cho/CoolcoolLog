@@ -53,6 +53,27 @@ public class SleepFragment extends Fragment {
         Button btnStartSleeping = view.findViewById(R.id.btn_start_sleeping);
 
         // 데이터베이스에서 알람 시간 가져오기
+        loadAlarmTime();
+
+        // 알람 아이콘 크기 설정
+        setAlarmIconSize(tvAlarmTime);
+
+        // 시간 포맷 초기화
+        timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+
+        // 현재 시간 업데이트 시작
+        startClock();
+
+        // 수면 시작 버튼 클릭 이벤트
+        btnStartSleeping.setOnClickListener(v -> {
+            sleepStartTime = System.currentTimeMillis(); // 수면 시작 시간 기록
+            saveSleepStartTime();
+        });
+
+        return view;
+    }
+
+    private void loadAlarmTime() {
         new Thread(() -> {
             try {
                 String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -94,24 +115,37 @@ public class SleepFragment extends Fragment {
                 Log.e(TAG, "알람 시간 로드 실패", e);
             }
         }).start();
-
-        // 알람 아이콘 크기 설정
-        setAlarmIconSize(tvAlarmTime);
-
-        // 시간 포맷 초기화
-        timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-
-        // 현재 시간 업데이트 시작
-        startClock();
-
-        // 수면 시작 버튼 클릭 이벤트
-        btnStartSleeping.setOnClickListener(v -> {
-            sleepStartTime = System.currentTimeMillis(); // 수면 시작 시간 기록
-            storeSleepStartTime(); // 데이터베이스에 저장
-        });
-
-        return view;
     }
+
+    private void saveSleepStartTime() {
+        new Thread(() -> {
+            try {
+                String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                int sleepStartMinutes = convertMillisToMinutes(sleepStartTime);
+
+                SleepRecord record = sleepRecordDao.getLatestRecordByDate(currentDate);
+                if (record == null) {
+                    record = new SleepRecord();
+                    record.setDate(currentDate);
+                    record.setTargetSleepMinutes(480); // 기본값 설정 (8시간)
+                }
+
+                // 기존 TargetSleepMinutes 유지
+                int existingTargetSleepMinutes = record.getTargetSleepMinutes();
+                if (existingTargetSleepMinutes > 0) {
+                    record.setTargetSleepMinutes(existingTargetSleepMinutes);
+                }
+
+                record.setActualSleepStartMinutes(sleepStartMinutes);
+                sleepRecordDao.insertOrUpdate(record);
+
+                Log.d(TAG, "수면 시작 시간 저장: " + sleepStartMinutes + "분, Target Sleep Minutes: " + record.getTargetSleepMinutes());
+            } catch (Exception e) {
+                Log.e(TAG, "수면 시작 시간 저장 오류", e);
+            }
+        }).start();
+    }
+
 
     private String convertMinutesToTime(int minutes) {
         int hours = minutes / 60;
@@ -123,6 +157,12 @@ public class SleepFragment extends Fragment {
         calendar.set(Calendar.MINUTE, mins);
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         return sdf.format(calendar.getTime());
+    }
+
+    private int convertMillisToMinutes(long millis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(millis);
+        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
     }
 
     private void setAlarmIconSize(TextView textView) {
@@ -150,36 +190,6 @@ public class SleepFragment extends Fragment {
             }
         };
         handler.post(timeUpdater);
-    }
-
-    private void storeSleepStartTime() {
-        new Thread(() -> {
-            try {
-                String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-                SleepRecord record = sleepRecordDao.getLatestRecordByDate(currentDate);
-
-                if (record != null) {
-                    Log.d(TAG, "로드된 기록: Date=" + record.getDate() +
-                            ", BedtimeMinutes=" + record.getActualSleepStartMinutes() +
-                            ", WakeTimeMinutes=" + record.getWakeTimeMinutes() +
-                            ", TargetSleepMinutes=" + record.getTargetSleepMinutes());
-                } else {
-                    Log.d(TAG, "쿼리 결과 없음.");
-                }
-
-                // 모든 데이터 디버깅 출력
-                List<SleepRecord> allRecords = sleepRecordDao.getAllRecords();
-                for (SleepRecord rec : allRecords) {
-                    Log.d(TAG, "전체 데이터: ID=" + rec.getId() +
-                            ", Date=" + rec.getDate() +
-                            ", BedtimeMinutes=" + rec.getActualSleepStartMinutes() +
-                            ", WakeTimeMinutes=" + rec.getWakeTimeMinutes() +
-                            ", TargetSleepMinutes=" + rec.getTargetSleepMinutes());
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "데이터 로드 중 오류", e);
-            }
-        }).start();
     }
 
     @Override
