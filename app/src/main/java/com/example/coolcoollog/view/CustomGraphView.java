@@ -11,6 +11,7 @@ public class CustomGraphView extends View {
     private Paint linePaint; // 선을 그리기 위한 Paint
     private Paint pointPaint; // 점을 그리기 위한 Paint
     private Paint textPaint; // 텍스트(축 레이블) 표시용 Paint
+    private Paint gridPaint; // Y축 격자선용 Paint
     private float[] dataPoints = new float[]{8f, 9f, 7f, 6f, 10f}; // 샘플 데이터
     private String[] labels = new String[]{"Mon", "Tue", "Wed", "Thu", "Fri"}; // 샘플 X축 레이블
 
@@ -37,11 +38,18 @@ public class CustomGraphView extends View {
         pointPaint.setStyle(Paint.Style.FILL);
         pointPaint.setStrokeWidth(15f);
 
-        // 텍스트 Paint 설정
+        // 텍스트 Paint 설정 (X축, Y축 레이블)
         textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
-        textPaint.setTextSize(32f);
+        textPaint.setTextSize(40f);
+        textPaint.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         textPaint.setTextAlign(Paint.Align.CENTER);
+
+        // Y축 격자선 Paint 설정
+        gridPaint = new Paint();
+        gridPaint.setColor(Color.parseColor("#50FFFFFF")); // 반투명 흰색
+        gridPaint.setStrokeWidth(2f);
+        gridPaint.setStyle(Paint.Style.STROKE);
     }
 
     public void setData(float[] dataPoints, String[] labels) {
@@ -61,13 +69,20 @@ public class CustomGraphView extends View {
         // 그래프 영역 정의
         float width = getWidth();
         float height = getHeight();
-        float padding = 50f;
+        float padding = 100f;
 
         float graphWidth = width - (2 * padding);
         float graphHeight = height - (2 * padding);
 
-        float maxDataValue = 12f; // 데이터의 최대값 (예: 10시간)
+        float maxDataValue = 12f;
         float stepX = graphWidth / (dataPoints.length - 1); // X축 간격
+
+        // Y축 격자선 및 레이블 그리기
+        for (int i = 0; i <= maxDataValue; i += 2) { // 2시간 간격
+            float y = height - padding - (i / maxDataValue * graphHeight);
+            canvas.drawLine(padding, y, width - padding, y, gridPaint); // Y축 격자선
+            canvas.drawText(i + "h", padding - 40f, y + 10f, textPaint); // Y축 레이블
+        }
 
         // 선과 점 그리기
         float startX = padding;
@@ -90,9 +105,8 @@ public class CustomGraphView extends View {
         // X축 레이블 표시
         for (int i = 0; i < labels.length; i++) {
             float labelX = padding + (i * stepX);
-            float labelY = height - padding + 40f;
+            float labelY = height - padding + 60f; // X축 텍스트 위치 조정
             canvas.drawText(labels[i], labelX, labelY, textPaint);
         }
     }
 }
-
