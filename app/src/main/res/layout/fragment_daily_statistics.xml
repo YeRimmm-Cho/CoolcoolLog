@@ -102,7 +102,7 @@
         android:layout_marginTop="50dp">
 
         <!-- CustomProgressView -->
-        <com.example.coolcoollog.CustomProgressView
+        <com.example.coolcoollog.view.CustomProgressView
             android:id="@+id/customProgressView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

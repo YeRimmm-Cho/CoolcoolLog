@@ -1,4 +1,4 @@
-package com.example.coolcoollog;
+package com.example.coolcoollog.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,6 +7,8 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+
+import com.example.coolcoollog.R;
 
 public class CustomProgressView extends View {
 

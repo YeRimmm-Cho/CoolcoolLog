@@ -44,7 +44,7 @@
     </LinearLayout>
 
     <!-- 수면 패턴 그래프 -->
-    <com.example.coolcoollog.CustomGraphView
+    <com.example.coolcoollog.view.CustomGraphView
         android:id="@+id/sleepGraphView"
         android:background="@drawable/button_rec_setalarm"
         android:layout_width="match_parent"

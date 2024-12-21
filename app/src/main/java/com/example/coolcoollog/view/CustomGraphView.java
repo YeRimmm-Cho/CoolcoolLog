@@ -1,4 +1,4 @@
-package com.example.coolcoollog;
+package com.example.coolcoollog.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -66,7 +66,7 @@ public class CustomGraphView extends View {
         float graphWidth = width - (2 * padding);
         float graphHeight = height - (2 * padding);
 
-        float maxDataValue = 10f; // 데이터의 최대값 (예: 10시간)
+        float maxDataValue = 12f; // 데이터의 최대값 (예: 10시간)
         float stepX = graphWidth / (dataPoints.length - 1); // X축 간격
 
         // 선과 점 그리기

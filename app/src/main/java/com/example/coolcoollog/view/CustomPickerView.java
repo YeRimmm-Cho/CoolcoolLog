@@ -1,4 +1,4 @@
-package com.example.coolcoollog;
+package com.example.coolcoollog.view;
 
 import android.content.Context;
 import android.graphics.Canvas;

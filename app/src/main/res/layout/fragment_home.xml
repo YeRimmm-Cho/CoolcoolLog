@@ -16,7 +16,7 @@
             android:layout_height="wrap_content">
 
             <!-- Custom 원형 시간 선택기 -->
-            <com.example.coolcoollog.CustomPickerView
+            <com.example.coolcoollog.view.CustomPickerView
                 android:id="@+id/custom_picker_view"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
