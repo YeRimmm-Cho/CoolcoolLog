@@ -46,9 +46,9 @@
     <th>슬립 모드 화면</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/b3ea35d0-3ad9-451a-8afe-5747ac29a023"  width="300"></td>
-    <td align="center"><img src="https://github.com/user-attachments/assets/59eab204-c746-421c-9e7c-478abc9f4ff2"  width="300"></td>
-    <td align="center"><img src="https://github.com/user-attachments/assets/bb786ada-28b3-4707-9b46-208a02434e00"  width="300"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/b3ea35d0-3ad9-451a-8afe-5747ac29a023"  width="250"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/59eab204-c746-421c-9e7c-478abc9f4ff2"  width="250"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/bb786ada-28b3-4707-9b46-208a02434e00"  width="250"></td>
   </tr>
   <tr>
     <th>일간 수면 통계 화면</th>
@@ -56,9 +56,9 @@
     <th>월간 수면 통계 화면</th>
   </tr>
   <tr>
-    <td align="center"><img src="https://github.com/user-attachments/assets/3e3d97c2-422c-479d-b3d1-c4ecca13699f"  width="300"></td>
-    <td align="center"><img src="https://github.com/user-attachments/assets/394debb0-7fcc-4665-8a8d-783af4c7c969"  width="300"></td>
-    <td align="center"><img src="https://github.com/user-attachments/assets/bffda9ec-cb01-4bf3-b723-056bf7fb99e4" " width="300"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/3e3d97c2-422c-479d-b3d1-c4ecca13699f"  width="250"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/394debb0-7fcc-4665-8a8d-783af4c7c969"  width="250"></td>
+    <td align="center"><img src="https://github.com/user-attachments/assets/bffda9ec-cb01-4bf3-b723-056bf7fb99e4"  width="250"></td>
   </tr>
 </table>
 
