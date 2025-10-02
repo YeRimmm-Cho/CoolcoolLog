@@ -17,8 +17,9 @@ public class CustomPickerView extends View {
 
     private float centerX, centerY, radius;
     private float startAngle = 270; // 취침 시간 (위쪽, 12시)
-    private float endAngle = 90; // 기상 시간 (아래쪽, 6시)
+    private float endAngle = 0; // 기상 시간 (아래쪽, 6시)
     private OnTimeChangeListener onTimeChangeListener;
+    private static final int LABEL_STEP_HOURS = 2; // 3시간 간격 라벨
 
     public CustomPickerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -90,14 +91,20 @@ public class CustomPickerView extends View {
         // 원 테두리 그리기
         canvas.drawCircle(centerX, centerY, radius, paintCircle);
 
-        // 시간 표시 (12등분)
-        for (int i = 0; i < 12; i++) {
-            float angle = (float) Math.toRadians((i * 30) - 90); // 12등분 각도
-            float textX = (float) (centerX + (radius - 30) * Math.cos(angle)); // 반지름보다 30px 안쪽
-            float textY = (float) (centerY + (radius - 30) * Math.sin(angle)); // 반지름보다 30px 안쪽
-            String hour = String.format("%02d:00", i == 0 ? 12 : i);
-            canvas.drawText(hour, textX, textY, paintText);
+        // 시간 표시 (24등분)
+        for (int h = 0; h < 24; h += LABEL_STEP_HOURS) {
+            float angleDeg = (h * 15f) - 90f; // 24h는 1시간=15°
+            float a = (float) Math.toRadians(angleDeg);
+            float textX = (float) (centerX + (radius - 30) * Math.cos(a));
+            float textY = (float) (centerY + (radius - 30) * Math.sin(a));
+
+            int hour12 = h % 12;
+            if (hour12 == 0) hour12 = 12;        // 0 -> 12
+            String label = String.valueOf(hour12);
+
+            canvas.drawText(label, textX, textY, paintText);
         }
+
 
         // 취침/기상 시간 표시
         startX = (float) (centerX + radius * Math.cos(Math.toRadians(startAngle)));
@@ -198,20 +205,20 @@ public class CustomPickerView extends View {
     }
 
     public String angleToTime(float angle) {
-        // 12시(위쪽)를 0°, 6시(아래쪽)를 180°로 변환
-        float adjustedAngle = (angle + 90) % 360;
+        float adjustedAngle = (angle + 90f) % 360f;
+        int totalMinutes = Math.round((adjustedAngle / 360f) * 24f * 60f);
 
-        // 각도를 시간과 분으로 변환 (12시간 기준)
-        int totalMinutes = (int) ((adjustedAngle / 360) * 12 * 60);
-        int hours = totalMinutes / 60;
+        int hours24 = (totalMinutes / 60) % 24;   // 0~23
         int minutes = totalMinutes % 60;
 
-        // 오전/오후 처리 (12시간 시계 기준)
-        if (hours == 0) hours = 12; // 오전 12시 처리
+        int hours12 = hours24 % 12;
+        if (hours12 == 0) hours12 = 12;
+        String ampm = (hours24 >= 12) ? "PM" : "AM";   // 필요하면 .toLowerCase(Locale.getDefault())
 
-        // 시간 형식 반환 (AM/PM 포함)
-        return String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+        return String.format(Locale.getDefault(), "%02d:%02d %s", hours12, minutes, ampm);
     }
+
+
 
 
     public interface OnTimeChangeListener {

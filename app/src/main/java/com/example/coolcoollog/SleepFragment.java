@@ -59,7 +59,7 @@ public class SleepFragment extends Fragment {
         setAlarmIconSize(tvAlarmTime);
 
         // 시간 포맷 초기화
-        timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        timeFormat = new SimpleDateFormat("hh:mm:ss", Locale.getDefault());
 
         // 현재 시간 업데이트 시작
         startClock();
